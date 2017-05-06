@@ -2,44 +2,66 @@ const db = require('sqlite')
 const bcrypt = require('bcryptjs')
 const moment = require('moment')
 const Session = require('../models/sessions')
-
+const mongoose = require('mongoose')
 
 function timeConverter(UNIX_timestamp){
 	return moment(UNIX_timestamp).format("DD-MM-YYYY h:mm:ss")
 }
 
+var shemaArticle = new mongoose.Schema({
+  title: String,
+  content: String,
+  createdAt: String,
+  updatedAt: String,
+})
+
+// Model
+var ArticleModel = mongoose.model('article', shemaArticle);
 
 module.exports = {
 
 // fonctions principales
-insert: (params) => {
+	insert: (params) => {
 	var date = timeConverter(Date.now());
-	return db.run('INSERT INTO articles (title, content, createdAt, updatedAt) VALUES (?, ?, ?, ?)',
-		params.title,
-		params.content,
-		date,
-		date)
+	var newArticle = new ArticleModel({
+		title: params.title,
+		content: params.content,
+		createdAt: date,
+		updatedAt: date,
+		})
+	return newArticle.save().then((result) => {
+		return db.run('INSERT INTO articles (title, content) VALUES (?, ?)',
+			params.title,
+			params.content)
+	})
 },
 
-	update: (body, params, samePwd) => {
-		if (samePwd) var pwd = body.pwd
-		else var pwd = bcrypt.hashSync(body.pwd)
-		return db.all('UPDATE articles SET title = ?, content = ?, updatedAt = ? WHERE rowid = ?',
-			body.title,
-			body.content,
-			timeConverter(Date.now()),
-			params.userId)
+
+	update: (body, params) => {
+		var title = body.title;
+		var content = body.content;
+		var date = timeConverter(Date.now());
+		return ArticleModel.update( {$set: {content: content, updatedAt: date}}).then((result) => {
+				return db.all('UPDATE articles SET title = ?, content = ? WHERE rowid = ?',
+					body.title,
+					body.content,
+					params.articleId)
+			})
 	},
 
-	delete: (userId) => {
-		return db.all('DELETE FROM articles WHERE rowid = ?',
-			userId)
+
+
+	delete: (title) => {
+		console.log(title);
+		return ArticleModel.remove({title: title}).then((result) => {
+			return db.all('DELETE FROM articles WHERE title = ?',title)
+		})
 	},
 
 // getters
 	getId: (accessToken) => {
 		return Session.exists(accessToken).then((result) => {
-			return result.userId
+			return result.articleId
 		})
 	},
 
@@ -51,6 +73,11 @@ insert: (params) => {
 	getByTitle: (title) => {
 		return db.all('SELECT rowid, * FROM articles WHERE title = ?',
 			title)
+	},
+
+	getTheTitle: (id) => {
+		return db.all('SELECT title, * FROM articles WHERE rowid = ?',
+			id)
 	},
 
 	count: () => {

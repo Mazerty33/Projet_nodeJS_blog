@@ -88,6 +88,10 @@ db.open('bdd.db').then(() => {
 				if (article == '') return next()
 				var notThisOne = true
 				if (thisArticleId == req.params.articleId) notThisOne = false
+				// cheat moche à changer
+				// var save = article[0];
+				// req.params.title = save.title;
+				// console.log(req.params);
 				res.format({
 					html: () => {
 						res.render('articles/show', {
@@ -180,12 +184,7 @@ db.open('bdd.db').then(() => {
 
 	router.put('/:articleId', (req, res) => {
 		Article.getById(req.params.articleId).then((article) => {
-			var samePwd = false
-			if (req.body.pwd == '') {
-				req.body.pwd = article[0].pwd
-				samePwd = true
-			}
-			Article.update(req.body, req.params, samePwd).then((result) => {
+			Article.update(req.body, req.params).then((result) => {
 				res.format({
 					html: () => {
 						res.redirect('/articles')
@@ -201,11 +200,15 @@ db.open('bdd.db').then(() => {
 	})
 
 	router.delete('/:articleId', (req, res) => {
-		var articleId = req.params.articleId
+		console.log("début delete");
+		var articleId = req.params.articleId;
 		Article.getById(articleId).then((article) => {
+			// sale
+			var save = article[0]
+			var title = save.title
 			if (article != '') {
-				Team.deleteArticle(article[0]['title']).then((result) => {
-					Article.delete(articleId).then((result) => {
+					Article.delete(title).then((result) => {
+						console.log('supression ok');
 						res.format({
 							html: () => {
 								res.redirect('/articles')
@@ -218,12 +221,12 @@ db.open('bdd.db').then(() => {
 						res.status(404)
 						res.end('ERR4 > '+err)
 					})
-				})
 			} else {
 				res.end('Article doesn\'t exist')
 			}
 		})
 	})
+
 
 	router.all('*', (req, res) => {
 		res.status(501)
