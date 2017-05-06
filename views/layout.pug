@@ -1,0 +1,24 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/css/style.css')
+	body
+	block content
+
+
+
+	body
+
+		a(href="/") Home
+		br
+		a(href="/articles") All articles
+		br
+		a(href="/articles/add") Add article
+		br
+		a(href="/stats") Stats
+		br
+
+
+		form( method="post", action= "/sessions?_method=DELETE")
+			input(type="submit", value="Disconect")

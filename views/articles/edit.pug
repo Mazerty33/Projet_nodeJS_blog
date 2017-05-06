@@ -1,0 +1,34 @@
+extends ../layout
+
+block content
+	- article = article
+	if article
+		h1 Modifie the article
+	else
+		h1 New article
+	- warning = warning
+	if warning
+		p Veuillez remplir tous les champs
+	- taken = taken
+	if taken
+		p Ce titre existe déjà
+	form(method="post", action= action)
+		div
+			label(for="title") Titre :
+			div
+				if article
+					input(type="text", name="title", value= article[0].title)
+				else
+					input(type="text", name="title")
+
+		div
+			label(for="content") Contenue:
+			div
+				if article
+					input(type="text", name="content", value= article[0].content)
+				else
+					input(type="text", name="content")
+		div
+			div
+				p
+				input(type="submit", value="Register")

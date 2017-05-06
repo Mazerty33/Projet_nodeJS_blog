@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+  h1= title
+
+  p article list :
+
+  table(border=1)
+    tr
+      th titre
+      th contenue
+    tr
+      td= article.title
+      td= article.content
+
+
+  ul.pagination
+    - var nbPage = Math.ceil(count / limit)
+    - for (var i = 0; i < nbPage; i++) {
+      li
+        a(href='/articles?limit=' + limit + '&offset=' + (i*limit)) Page #{i + 1}
+    - }
