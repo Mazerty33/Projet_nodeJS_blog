@@ -89,23 +89,25 @@ db.open('bdd.db').then(() => {
 				var notThisOne = true
 				if (thisArticleId == req.params.articleId) notThisOne = false
 				// cheat moche à changer
-				// var save = article[0];
-				// req.params.title = save.title;
-				// console.log(req.params);
-				res.format({
-					html: () => {
-						res.render('articles/show', {
-							title: 'Utilisateur '+req.params.articleId,
-							article: article,
-							suppr: '/articles/'+req.params.articleId+'?_method=DELETE',
-							modif: '/articles/'+req.params.articleId+'/edit',
-							notThisOne: notThisOne
-						})
-					},
-					json: () => {
-						res.send(article)
-					}
-				})
+				 var save = article[0];
+				 title = save.title;
+				 // console.log(req.params);
+				 Article.IncrementView(title).then((result) =>{
+					 res.format({
+						 html: () => {
+							 res.render('articles/show', {
+								 title: 'Utilisateur '+req.params.articleId,
+								 article: article,
+								 suppr: '/articles/'+req.params.articleId+'?_method=DELETE',
+								 modif: '/articles/'+req.params.articleId+'/edit',
+								 notThisOne: notThisOne
+							 })
+						 },
+						 json: () => {
+							 res.send(article)
+						 }
+					 })
+				 })
 			}).catch((err) => {
 				console.log(err)
 			})

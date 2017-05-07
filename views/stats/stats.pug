@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+	h1 articles in my database
+	table
+		tr
+			th ID
+			th titre
+			th Vus
+		- articlesdata = articles
+		each article in articlesdata
+			tr
+				td= article.rowid
+				td= article.title
+				td= View
+	br
+	h2
+		a(href="/") Retour

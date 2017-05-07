@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs')
 const moment = require('moment')
 const Session = require('../models/sessions')
 const mongoose = require('mongoose')
+const Redis = require('ioredis')
+const redis = new Redis()
 
 function timeConverter(UNIX_timestamp){
 	return moment(UNIX_timestamp).format("DD-MM-YYYY h:mm:ss")
@@ -33,6 +35,8 @@ module.exports = {
 		return db.run('INSERT INTO articles (title, content) VALUES (?, ?)',
 			params.title,
 			params.content)
+	}).then((result) => {
+		return redis.hmset('Article:'+params.title, 'Vus', 0)
 	})
 },
 
@@ -46,6 +50,10 @@ module.exports = {
 					body.title,
 					body.content,
 					params.articleId)
+			}).then((result) => {
+				return redis.del('Article:'+params.title)
+			}).then((result) => {
+				return redis.hmset('Article:'+params.title, 'Vus', 0)
 			})
 	},
 
@@ -55,6 +63,8 @@ module.exports = {
 		console.log(title);
 		return ArticleModel.remove({title: title}).then((result) => {
 			return db.all('DELETE FROM articles WHERE title = ?',title)
+		}).then((result) => {
+			return redis.del('Article:'+title)
 		})
 	},
 
@@ -88,7 +98,19 @@ module.exports = {
 		return db.all('SELECT *, rowid FROM articles LIMIT ? OFFSET ?',
 			params.limit || limitToShow,
 			params.offset || 0)
-	}
+	},
 
+// compteur de vus
+	IncrementView: (title) =>{
+	return redis.hget('Article:'+title, 'Vus').then((view) => {
+			var vus = parseInt(view);
+			vus += 1;
+			return redis.hmset('Article:'+title, 'Vus', vus)
+		})
+	},
+
+	GetView: (title)=>{
+		return redis.hget('Article:'+title, 'Vus')
+	}
 
 }

@@ -66,6 +66,9 @@ app.use((req, res, next) => {
 	if ((req.url == '/sessions') && (req.method == 'GET' || req.method == 'POST' || req.method == 'DELETE')) {
 		next()
 	}
+	else if (req.url == '/stats') {
+		next()
+	}
 	else if (req.url == '/articles') {
 		next()
 	}
@@ -93,6 +96,7 @@ app.use((req, res, next) => {
 // La liste des différents routeurs (dans l'ordre)
 app.use('/sessions', require('./routes/sessions'))
 app.use('/articles', require('./routes/articles'))
+app.use('/stats', require('./routes/stats'))
 app.use('/', require('./routes/index'))
 
 
